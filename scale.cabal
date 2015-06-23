@@ -1,0 +1,30 @@
+Name:                scale
+Version:             0.1
+Description:         Smart City Applications LanguagE
+License:             MIT
+Author:              Pedro Martins
+Maintainer:          pedromartins.pt@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Executable scc
+  Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift, syb
+  Main-is:  Scale/Scale.hs
+  Other-Modules:
+    Scale.Compile,
+    Scale.Optimise,
+    Scale.Parser,
+    Scale.Types,
+    Scale.Backends.Legacy,
+    Scale.Drivers.Fake
+  Hs-Source-Dirs: src
+
+Library
+  Exposed-Modules:
+    Scale.Backends.Legacy,
+    Scale.Types,
+    Scale.Compile,
+    Scale.Optimise,
+    Scale.Parser,
+    Scale.Drivers.Fake
+  Hs-Source-Dirs: src
