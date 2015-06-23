@@ -51,7 +51,7 @@ data Program = PVar Ident
           | Seq Program Program
           deriving (Eq, Show)
 
-type Backend = Program -> IO ByteString
+type Backend = (Program, DepReq) -> IO ByteString
 
 type Frontend = Parser Expr
 

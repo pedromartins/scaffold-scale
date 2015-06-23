@@ -18,6 +18,7 @@ import Control.Arrow
 import Control.Monad
 import System.Environment
 import System.IO
+import System.Exit
 import Data.Maybe
 import Text.ParserCombinators.Parsec
 
@@ -40,12 +41,15 @@ compileString s = case parse Parser.scaleExpr "test" s of
 
 main :: IO ()
 main = do
-  [fname] <- getArgs
+  mfname <- fmap listToMaybe getArgs
+  unless (isJust mfname)
+    (putStrLn "scc: no input files\nUsage: scc <filename>" >> exitSuccess)
+  let fname = fromJust mfname
   s <- readFile fname
   case compileString s of
     Right (unzip -> (ps, qs)) ->
-      forM (zip [1..length ps] ps) $ \(i,p) -> do
-        doc <- Backends.Legacy.compileProgram $ p
+      forM (zip3 [1..length ps] ps qs) $ \(i,p,q) -> do
+        doc <- Backends.Legacy.compileProgram $ (p,q)
         B.writeFile (fname ++ show i) doc
     Left e -> (print e) >> fail "parse error"
   return ()

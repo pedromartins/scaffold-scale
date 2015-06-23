@@ -21,7 +21,7 @@ Executable scc
 
 Library
   Exposed-Modules:
-    Scale.Backends.Legacy,
+    Scale.Backends.Legacy.Prelude,
     Scale.Types,
     Scale.Compile,
     Scale.Optimise,
