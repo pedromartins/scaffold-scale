@@ -17,6 +17,7 @@ Executable scc
     Scale.Types,
     Scale.Backends.Legacy,
     Scale.Drivers.Fake
+    Scale.Drivers.POSIX
   Hs-Source-Dirs: src
 
 Library

@@ -1,11 +1,11 @@
 module Scale.Backends.Legacy.Prelude where
 
+import Control.Concurrent
 import Data.IORef
 import Data.Maybe
-import Scale.Drivers.Fake
+import Scale.Drivers.POSIX
 import qualified Data.ByteString.Char8 as B
 import System.Process
-import Control.Concurrent.MVar
 import Control.Monad
 import System.IO
 import Scale.Types
@@ -16,14 +16,25 @@ modify k v (kv@(k',_):kvs')
   | k Prelude.== k' = (k,v) : kvs'
   | otherwise = kv : modify k v kvs'
 
+broker = "achilles.doc.ic.ac.uk"
 mosquittoTopic = "test"
 topic s = "/" ++ s
 loadSpec = undefined
 
-broadcast :: DataQuery -> IO Integer
-broadcast q = forever $ do
- qv <- query q
- (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -t " ++ mosquittoTopic ++ (topic q) ++ " -m " ++ qv
+-- TODO: late binding for driver
+broadcastSimple :: DataQuery -> IO ()
+broadcastSimple q = do
+ (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -h " ++ broker ++ " -t " ++ mosquittoTopic ++ (topic q) ++ " -m " ++ show q
+ putStrLn $ mosquittoTopic ++ topic q ++ " -> " ++ (show $ q)
+ threadDelay 1000000
+ waitForProcess ph
+ Prelude.return ()
+
+-- TODO: late binding for driver
+broadcast :: [(DepReq, Driver)] -> DataQuery -> IO Integer
+broadcast drivers q = forever $ do
+ qv <- query (Provides q) drivers
+ (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -h " ++ broker ++ " -t " ++ mosquittoTopic ++ (topic q) ++ " -m " ++ qv
  putStrLn $ mosquittoTopic ++ topic q ++ " -> " ++ (show $ qv)
  waitForProcess ph
  Prelude.return qv
@@ -32,7 +43,7 @@ broadcast q = forever $ do
 subscribe :: String -> IO String
 subscribe q = do
   -- FIXME: The following code assumes one reading per line
-  (_, oh, _, ph) <- runInteractiveCommand $ "mosquitto_sub -t " ++ mosquittoTopic ++ (topic q)
+  (_, oh, _, ph) <- runInteractiveCommand $ "mosquitto_sub -h " ++ broker ++ " -t " ++ mosquittoTopic ++ (topic q)
   putStrLn $ mosquittoTopic ++ topic q ++ "?"
   l <- hGetLine $ oh
   terminateProcess ph
@@ -42,8 +53,11 @@ subscribe q = do
 querySource :: String -> IO String
 querySource = subscribe
 
-executeCommand :: Command -> IO ()
-executeCommand c = putStrLn (c ++ "!") Prelude.>> broadcast c Prelude.>> Prelude.return ()
+executeCommand :: [(DepReq, Driver)] -> Command -> IO ()
+executeCommand drivers c = do
+  (_, _, _, ph) <- runInteractiveCommand (fromJust $ Prelude.lookup (IsCapableOf c) drivers)
+  waitForProcess ph
+  Prelude.return ()
 
 (>>=) :: (Monad m) => m a -> (a -> m b) -> m b
 (>>=) = (Prelude.>>=)
@@ -70,3 +84,7 @@ readIORef = Data.IORef.readIORef
 
 ret :: (Monad m) => a -> m a
 ret = Prelude.return
+
+threshold :: IO String -> IO Bool
+threshold mi = mi Prelude.>>= (Prelude.return Prelude.. (>500) Prelude.. Prelude.read)
+

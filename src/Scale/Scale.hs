@@ -1,8 +1,9 @@
 {-# LANGUAGE PackageImports, ViewPatterns #-}
 module Main where
 
-import Scale.Backends.Legacy as Backends.Legacy
 import Scale.Parser as Parser
+import Scale.Backends.Legacy as Backends.Legacy
+import Scale.Frontends.FScale as Frontends.FScale
 import Scale.Drivers.Fake as Drivers.Fake
 
 import Scale.Compile
@@ -25,14 +26,14 @@ import Text.ParserCombinators.Parsec
 import Language.Haskell.TH
 import Language.Haskell.TH.Ppr
 
-frontends :: [Frontend]
-frontends = [Parser.scaleExpr]
+-- frontends :: [Frontend]
+-- frontends = [Frontends.FScale.scaleExpr]
 
 backends :: [Backend]
 backends = [Backends.Legacy.compileProgram]
 
-drivers :: [Driver]
-drivers = [Drivers.Fake.query]
+-- drivers :: [Driver]
+-- drivers = [Drivers.Fake.query]
 
 compileString :: String -> Either ParseError [(Program, DepReq)]
 compileString s = case parse Parser.scaleExpr "test" s of

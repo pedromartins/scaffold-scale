@@ -13,7 +13,7 @@ import qualified Text.ParserCombinators.Parsec.Token as Token
 import Scale.Types
 
 scaleDef = haskellStyle
-  { reservedOpNames = [ "λ",  "?", "¢", ".", "→", "=", ":" ]
+  { reservedOpNames = [ "λ",  "?", "¢", ".", "→", "=", ":", ">" ]
   , reservedNames = [ "with", "ccase", "of", "Case", "if", "then", "else"]
   }
 

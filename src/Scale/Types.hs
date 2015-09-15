@@ -4,8 +4,6 @@ module Scale.Types where
 import Data.ByteString
 import Data.Data
 
-import Text.Parsec.String
-
 type DataQuery = String
 type Command = String
 type Ident = String
@@ -24,7 +22,7 @@ data Expr = Var Ident
           | Cmd Command
           | With Requirement Expr
           | Constr Ident
-          deriving (Data, Eq, Show)
+          deriving (Data, Typeable, Eq, Show)
 
 data Decl = ValAssgn Ident Expr
           deriving (Eq, Show)
@@ -33,7 +31,7 @@ data DepReq = Provides DataQuery
             | IsCapableOf Command
             | Fulfills Requirement
             | Any
-            deriving (Eq, Show, Read)
+            deriving (Data, Typeable, Eq, Show, Read)
 
 type Module = [Decl]
 
@@ -51,9 +49,9 @@ data Program = PVar Ident
           | Seq Program Program
           deriving (Eq, Show)
 
+-- TODO:Should be a newtype: ByteString is not specific enough
 type Backend = (Program, DepReq) -> IO ByteString
 
-type Frontend = Parser Expr
-
-type Driver = DataQuery -> IO String
+-- TODO:Should be a newtype: String is not specific enough
+type Driver = String
 
