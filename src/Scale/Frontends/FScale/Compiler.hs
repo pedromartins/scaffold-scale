@@ -1,5 +1,4 @@
-
-module Scale.Compile where
+module Scale.Frontends.FScale.Compiler where
 
 import Data.Data
 
@@ -7,6 +6,7 @@ import Data.Generics
 import Data.Generics.Schemes
 
 import Scale.Types
+import Scale.Frontends.FScale.Types
 
 compileModule :: (Module, Requirement) -> [(Program, DepReq)]
 compileModule = concatMap compileDecl . fst

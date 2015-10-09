@@ -8,14 +8,15 @@ Build-Type:          Simple
 Cabal-Version:       >=1.2
 
 Executable scc
-  Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift, syb
+  Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift, syb, optparse-applicative
   Main-is:  Scale/Scale.hs
   Other-Modules:
-    Scale.Compile,
     Scale.Optimise,
-    Scale.Parser,
     Scale.Types,
     Scale.Backends.Legacy,
+    Scale.Frontends.FScale.Compiler,
+    Scale.Frontends.FScale.Parser,
+    Scale.Frontends.FScale.Types,
     Scale.Drivers.Fake
     Scale.Drivers.POSIX
   Hs-Source-Dirs: src
@@ -23,9 +24,11 @@ Executable scc
 Library
   Exposed-Modules:
     Scale.Backends.Legacy.Prelude,
+    Scale.Backends.Legacy,
+    Scale.Frontends.FScale.Compiler,
+    Scale.Frontends.FScale.Parser,
+    Scale.Frontends.FScale.Types,
     Scale.Types,
-    Scale.Compile,
     Scale.Optimise,
-    Scale.Parser,
     Scale.Drivers.Fake
   Hs-Source-Dirs: src

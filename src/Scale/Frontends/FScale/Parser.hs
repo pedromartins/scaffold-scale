@@ -1,5 +1,5 @@
 
-module Scale.Parser where
+module Scale.Frontends.FScale.Parser where
 
 import Control.Applicative
 
@@ -11,6 +11,7 @@ import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
 import Scale.Types
+import Scale.Frontends.FScale.Types
 
 scaleDef = haskellStyle
   { reservedOpNames = [ "λ",  "?", "¢", ".", "→", "=", ":", ">" ]

@@ -3,37 +3,18 @@ module Scale.Types where
 
 import Data.ByteString
 import Data.Data
+import qualified Text.ParserCombinators.Parsec as Parsec
 
 type DataQuery = String
 type Command = String
 type Ident = String
 type Requirement = String
 
-data Stmt = ExprStmt Expr
-          | Bind Ident Expr
-          deriving (Eq, Show)
-
-data Expr = Var Ident
-          | Lam Ident Expr
-          | App Expr Expr
-          | If Expr Expr Expr
-          | DataQ DataQuery
-          | DataBracket DataQuery Expr
-          | Cmd Command
-          | With Requirement Expr
-          | Constr Ident
-          deriving (Data, Typeable, Eq, Show)
-
-data Decl = ValAssgn Ident Expr
-          deriving (Eq, Show)
-
 data DepReq = Provides DataQuery
             | IsCapableOf Command
             | Fulfills Requirement
             | Any
             deriving (Data, Typeable, Eq, Show, Read)
-
-type Module = [Decl]
 
 data Program = PVar Ident
           | PLam Ident Program
@@ -50,6 +31,7 @@ data Program = PVar Ident
           deriving (Eq, Show)
 
 -- TODO:Should be a newtype: ByteString is not specific enough
+type Frontend = ByteString -> Either Parsec.ParseError [(Program, DepReq)]
 type Backend = (Program, DepReq) -> IO ByteString
 
 -- TODO:Should be a newtype: String is not specific enough
