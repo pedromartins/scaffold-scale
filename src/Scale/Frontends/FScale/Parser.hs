@@ -48,8 +48,8 @@ scaleExpr = foldl1 App <$> sepBy scaleExpr' whiteSpace
                      <*> (reserved "else" *> scaleExpr)
               <|> DataQ <$> (reservedOp "?" *> dataExpr)
               <|> try (DataBracket <$> dataExpr <*> brackets scaleExpr)
-              <|> Cmd <$> (reservedOp "¢" *> command)
-              <|> With <$> (reserved "with" *> requirement) <*> (whiteSpace *> scaleExpr)
+              <|> Cmd <$> (reserved "cmd" *> command)
+              <|> With <$> (reserved "with" *> requirement) <*> sepBy identifier (reservedOp ",") <*> (whiteSpace *> scaleExpr)
               <|> parens scaleExpr
               <|> (do x <- identifier
                       case lookup x builtins of

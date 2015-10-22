@@ -10,6 +10,7 @@ import qualified Data.ByteString.Char8 as B
 import Data.Char
 import Data.Maybe
 import Data.List
+import Data.List.Split
 import Text.Parsec.Prim(parse)
 import Control.Applicative
 import Control.Arrow
@@ -45,6 +46,7 @@ backendReader =
 data CompilerArgs =
   CompilerArgs { frontend :: Frontend
                , backend :: Backend
+               , opts :: [String]
                , iFile :: String
                }
 
@@ -57,21 +59,20 @@ readMaybe = eitherReader $ \arg -> case reads arg of
   _         -> return Nothing
 
 parseScaleArgs = CompilerArgs <$>
-      option frontendReader (value defaultFrontend <> short 'f' <> long "frontend"
-                              <> help ("Frontend to use. Frontends available:" ++ (show (map fst frontends))))
-  <*> option backendReader (value defaultBackend <> short 'b' <> long "backend"
-                              <> help ("Backend to use. Backends available:" ++ (show (map fst backends))))
-  <*> strArgument (help "Input file")
+      option frontendReader (value defaultFrontend <> short 'f' <> long "frontend" <> metavar "<frontend>"
+                              <> help ("Frontend to use. Frontends available:" ++ (unwords (map fst frontends))))
+  <*> option backendReader (value defaultBackend <> short 'b' <> long "backend" <> metavar "<backend>"
+                              <> help ("Backend to use. Backends available:" ++ (unwords (map fst backends))))
+  <*> fmap (splitOn ",") (strOption (long "opts" <> metavar "<opts>" <> help "Comma separated list of options to pass to frontend/backend."))
+  <*> strArgument (metavar "file")
 
 main :: IO ()
 main = do
-  CompilerArgs frontend backend fname <- execParser (info (helper <*> parseScaleArgs) fullDesc)
+  CompilerArgs frontend backend opts fname <- execParser (info (helper <*> parseScaleArgs) fullDesc)
   s <- B.readFile fname
-  case frontend s of
-    Right (unzip -> (ps, qs)) ->
-      forM (zip3 [1..length ps] ps qs) $ \(i,p,q) -> do
-        doc <- backend $ (p,q)
-        B.writeFile (fname ++ show i) doc
-    Left e -> (print e) >> fail "parse error"
+  (ps, qs) <- unzip <$> frontend opts s
+  forM (zip3 [1..length ps] ps qs) $ \(i,p,q) -> do
+    doc <- backend opts $ (p,q)
+    B.writeFile (fname ++ show i) doc
   return ()
 

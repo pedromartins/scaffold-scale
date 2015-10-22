@@ -18,7 +18,7 @@ data Expr = Var Ident
           | DataQ DataQuery
           | DataBracket DataQuery Expr
           | Cmd Command
-          | With Requirement Expr
+          | With Requirement [Ident] Expr
           | Constr Ident
           deriving (Data, Typeable, Eq, Show)
 

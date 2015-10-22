@@ -13,26 +13,33 @@ type Requirement = String
 data DepReq = Provides DataQuery
             | IsCapableOf Command
             | Fulfills Requirement
+            | And DepReq DepReq
             | Any
             deriving (Data, Typeable, Eq, Show, Read)
 
+data Message = DataMessage DataQuery
+             | CommandMessage Command
+             | HeapMessage [Ident]
+             deriving (Eq, Show)
+
 data Program = PVar Ident
-          | PLam Ident Program
-          | PApp Program Program
-          | PIf Program Program Program
-          | Pub DataQuery
-          | SubC Command
-          | Sub DataQuery
-          | Read DataQuery
-          | PCmd Command
-          | PWith Requirement Program
-          | PConstr Ident
-          | Seq Program Program
-          deriving (Eq, Show)
+             | PLam Ident Program
+             | PApp Program Program
+             | PIf Program Program Program
+             | PWhile Program Program
+             | Pub Message
+             | Sub Message
+             | Read DataQuery
+             | PWith Requirement Program
+             | PConstr Ident
+             | Seq Program Program
+             deriving (Eq, Show)
 
 -- TODO:Should be a newtype: ByteString is not specific enough
-type Frontend = ByteString -> Either Parsec.ParseError [(Program, DepReq)]
-type Backend = (Program, DepReq) -> IO ByteString
+type Option = String
+
+type Frontend = [Option] -> ByteString -> IO [(Program, DepReq)]
+type Backend = [Option] -> (Program, DepReq) -> IO ByteString
 
 -- TODO:Should be a newtype: String is not specific enough
 type Driver = String
