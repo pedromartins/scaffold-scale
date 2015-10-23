@@ -59,7 +59,7 @@ exprToProgram q e = let (p, pqs) = exprToProgram' q e in (p,q):pqs
       where (p, pqs) = exprToProgram' q e
     exprToProgram' q (Cmd c) = (Pub (CommandMessage c), [])
     exprToProgram' q (With r vs e) = (Pub (HeapMessage vs) `Seq` (Sub (HeapMessage vs)),
-      [(Sub (HeapMessage vs) `Seq` p `Seq` (Pub (HeapMessage vs)), Fulfills r)])
+      pqs ++ [(Sub (HeapMessage vs) `Seq` p `Seq` (Pub (HeapMessage vs)), Fulfills r)])
       where (p, pqs) = exprToProgram' (q `And` Fulfills r) e
     exprToProgram' q (Constr i) = (PConstr i, [])
 
