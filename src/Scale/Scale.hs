@@ -3,6 +3,7 @@ module Main where
 
 import Scale.Backends.Legacy as Backends.Legacy
 import Scale.Frontends.FScale as Frontends.FScale
+import Scale.Frontends.GScale.GFScale as Frontends.GFScale
 
 import Scale.Types
 
@@ -27,7 +28,8 @@ import Language.Haskell.TH
 import Language.Haskell.TH.Ppr
 
 frontends :: [(String, Frontend)]
-frontends = [("fscale", Frontends.FScale.fScale)]
+frontends = [("fscale", Frontends.FScale.fScale)
+            ,("gfscale", Frontends.GFScale.gfScale)]
 
 frontendReader :: ReadM Frontend
 frontendReader =
@@ -63,7 +65,7 @@ parseScaleArgs = CompilerArgs <$>
                               <> help ("Frontend to use. Frontends available:" ++ (unwords (map fst frontends))))
   <*> option backendReader (value defaultBackend <> short 'b' <> long "backend" <> metavar "<backend>"
                               <> help ("Backend to use. Backends available:" ++ (unwords (map fst backends))))
-  <*> fmap (splitOn ",") (strOption (long "opts" <> metavar "<opts>" <> help "Comma separated list of options to pass to frontend/backend."))
+  <*> fmap (splitOn ",") (strOption (value "" <> long "opts" <> metavar "<opts>" <> help "Comma separated list of options to pass to frontend/backend."))
   <*> strArgument (metavar "file")
 
 main :: IO ()

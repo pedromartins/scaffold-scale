@@ -8,12 +8,14 @@ Build-Type:          Simple
 Cabal-Version:       >=1.2
 
 Executable scc
-  Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift, syb, optparse-applicative, split
+  Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift,
+                 syb, optparse-applicative, split, monads-tf
   Main-is:  Scale/Scale.hs
   Other-Modules:
     Scale.Optimise,
     Scale.Types,
     Scale.Backends.Legacy,
+    Scale.Frontends.GScale.GFScale,
     Scale.Frontends.FScale.Compiler,
     Scale.Frontends.FScale.Parser,
     Scale.Frontends.FScale.Types,

@@ -19,7 +19,8 @@ data DepReq = Provides DataQuery
 
 data Message = DataMessage DataQuery
              | CommandMessage Command
-             | HeapMessage [Ident]
+             | HeapMessage String Integer [Ident]
+             | ResultMessage String Integer Program
              deriving (Eq, Show)
 
 data Program = PVar Ident
@@ -33,6 +34,7 @@ data Program = PVar Ident
              | PWith Requirement Program
              | PConstr Ident
              | Seq Program Program
+             | PExecve String
              deriving (Eq, Show)
 
 -- TODO:Should be a newtype: ByteString is not specific enough

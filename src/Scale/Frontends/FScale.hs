@@ -25,5 +25,5 @@ fScale flags s =
     Left err -> fail (show err)
     Right d -> do
       when (elem "dump-parse" flags) $ print d
-      return (compileDecl d)
+      return (compileDecl "test" d)
 
