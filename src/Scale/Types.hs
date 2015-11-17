@@ -9,6 +9,7 @@ type DataQuery = String
 type Command = String
 type Ident = String
 type Requirement = String
+type Node = String
 
 data DepReq = Provides DataQuery
             | IsCapableOf Command

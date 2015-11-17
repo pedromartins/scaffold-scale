@@ -9,12 +9,13 @@ Cabal-Version:       >=1.2
 
 Executable scc
   Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift,
-                 syb, optparse-applicative, split, monads-tf
+                 syb, optparse-applicative, split, monads-tf, zeromq4-haskell
   Main-is:  Scale/Scale.hs
   Other-Modules:
     Scale.Optimise,
     Scale.Types,
     Scale.Backends.Legacy,
+    Scale.Backends.LegacyZMQ,
     Scale.Frontends.GScale.GFScale,
     Scale.Frontends.FScale.Compiler,
     Scale.Frontends.FScale.Parser,
@@ -25,7 +26,9 @@ Executable scc
 
 Library
   Exposed-Modules:
+    Scale.Backends.LegacyZMQ.Prelude,
     Scale.Backends.Legacy.Prelude,
+    Scale.Backends.LegacyZMQ,
     Scale.Backends.Legacy,
     Scale.Frontends.FScale.Compiler,
     Scale.Frontends.FScale.Parser,
@@ -33,4 +36,5 @@ Library
     Scale.Types,
     Scale.Optimise,
     Scale.Drivers.Fake
+    Scale.Drivers.POSIX
   Hs-Source-Dirs: src

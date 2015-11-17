@@ -2,6 +2,7 @@
 module Main where
 
 import Scale.Backends.Legacy as Backends.Legacy
+import Scale.Backends.LegacyZMQ as Backends.LegacyZMQ
 import Scale.Frontends.FScale as Frontends.FScale
 import Scale.Frontends.GScale.GFScale as Frontends.GFScale
 
@@ -38,7 +39,8 @@ frontendReader =
                         Nothing -> Left "Invalid frontend.")
 
 backends :: [(String, Backend)]
-backends = [("legacy", Backends.Legacy.compileProgram)]
+backends = [("legacy", Backends.Legacy.compileProgram)
+           ,("legacyzmq", Backends.LegacyZMQ.compileProgram)]
 
 backendReader :: ReadM Backend
 backendReader =

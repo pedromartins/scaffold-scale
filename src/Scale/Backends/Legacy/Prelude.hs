@@ -16,27 +16,28 @@ modify k v (kv@(k',_):kvs')
   | k Prelude.== k' = (k,v) : kvs'
   | otherwise = kv : modify k v kvs'
 
-broker = "localhost"
+broker = fromMaybe "localhost"
+
 mosquittoTopic = "test"
 topic s = "/" Prelude.++ s
 loadSpec = undefined
 
 -- TODO: Reliable pub.
-pub :: String -> String -> IO ()
-pub t m = do
+pub :: Maybe String -> String -> String -> IO ()
+pub mb t m = do
  threadDelay 1000000
- putStrLn $ "mosquitto_pub  -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
- (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
+ putStrLn $ "mosquitto_pub  -h " Prelude.++ broker mb Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
+ (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -h " Prelude.++ broker mb Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
  threadDelay 1000000
  waitForProcess ph
  Prelude.return ()
 
 -- TODO: Timeout sub with default action
-sub :: String -> IO String
-sub t = do
+sub :: Maybe String -> String -> IO String
+sub mb t = do
   -- FIXME: The following code assumes one reading per line
-  putStrLn $ "mosquitto_sub -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
-  (_, oh, _, ph) <- runInteractiveCommand $ "mosquitto_sub -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
+  putStrLn $ "mosquitto_sub -h " Prelude.++ broker mb Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
+  (_, oh, _, ph) <- runInteractiveCommand $ "mosquitto_sub -h " Prelude.++ broker mb Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
   l <- hGetLine $ oh
   terminateProcess ph
   Prelude.return l

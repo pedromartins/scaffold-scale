@@ -6,7 +6,7 @@ module Scale.Backends.Legacy where
 import Control.Arrow
 import Data.Maybe
 import Data.IORef
-import Scale.Drivers.Fake
+import Scale.Drivers.POSIX
 import qualified Data.ByteString.Char8 as B
 import System.Process
 import Control.Concurrent.MVar
@@ -37,9 +37,16 @@ compileProgram flags (p,q) = do
                                                \import Data.IORef\n\
                                                \import System.Environment\n\
                                                \import Scale.Types\n\
+                                               \import Scale.Drivers.POSIX\n\
                                                \import Scale.Backends.Legacy.Prelude\n\
                                                \main = do\n\
-                                               \  drivers <- (fmap (Prelude.read Prelude.. head) getArgs :: IO [(DepReq, Driver)])\n\
+                                               \  args <- getArgs\n\
+                                               \  let drivers :: [(DepReq, Driver)]\n\
+                                               \      nodes :: [(DepReq, Node)]\n\
+                                               \      (drivers,nodes) = case args of\n\
+                                               \                          [] -> ([], [])\n\
+                                               \                          [sdrivers] -> (Prelude.read sdrivers, [])\n\
+                                               \                          [sdrivers,snodes] -> (Prelude.read sdrivers, Prelude.read snodes)\n\
                                                \  readings <- newIORef []\n\
                                                \  let none = \"_|_\"\n\
                                                \  ")
@@ -59,14 +66,14 @@ compileProgram flags (p,q) = do
 
     compileProgram' (PWhile p p') = [| fix (\f -> $(compileProgram' p) P.>>= \cond -> if cond then $(compileProgram' p') P.>>= f else return ()) |]
 
-    compileProgram' (Pub (DataMessage d)) = [| query ($(conE . mkName $ "Provides") $(stringE d)) $(varE . mkName $ "drivers") P.>>= pub d |]
-    compileProgram' (Pub (CommandMessage c)) = [| pub c $(stringE "!") |]
+    compileProgram' (Pub (DataMessage d)) = [| forever (query ($(conE . mkName $ "Provides") $(stringE d)) $(varE . mkName $ "drivers") P.>>= pub $(conE . mkName $ "Nothing") d) |]
+    compileProgram' (Pub (CommandMessage c)) = [| pub (P.lookup ($(conE . mkName $ "IsCapableOf") $(stringE c)) $(varE . mkName $ "nodes")) $(stringE c) $(stringE "!") |]
     compileProgram' (Pub (HeapMessage a n vs)) = [| pub (a P.++ "/" P.++ P.show n) (P.show $(listE . map (\v -> (tupE [stringE v, varE . mkName $ v])) $ vs)) |]
     compileProgram' (Pub (ResultMessage a n p)) = [| $(compileProgram' p) P.>>= pub (a P.++ "/" P.++ P.show n P.++ "/result") P.>> P.ret P.unit |]
 
-    compileProgram' (Sub (DataMessage d)) = [| sub $(stringE d) P.>>=
+    compileProgram' (Sub (DataMessage d)) = [| sub (P.lookup ($(conE . mkName $ "Provides") $(stringE d)) $(varE . mkName $ "nodes")) $(stringE d) P.>>=
       (\r -> modifyIORef $(varE . mkName $ "readings") (P.modify $(stringE d) r)) |]
-    compileProgram' (Sub (CommandMessage c)) = [| forever ((sub $(stringE c)) P.>>=
+    compileProgram' (Sub (CommandMessage c)) = [| forever ((sub $(conE . mkName $ "Nothing") $(stringE c)) P.>>=
       (\_ -> P.executeCommand $(varE . mkName $ "drivers") $(stringE c))) |]
     compileProgram' (Seq (Sub (HeapMessage a n vs)) p) = do
       vvs <- newName "vvs"

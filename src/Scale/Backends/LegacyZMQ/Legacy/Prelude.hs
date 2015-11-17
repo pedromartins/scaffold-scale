@@ -1,6 +1,5 @@
-module Scale.Backends.LegacyZMQ.Prelude where
+module Scale.Backends.Legacy.Prelude where
 
-import System.ZMQ4 as ZMQ
 import Control.Concurrent
 import Data.IORef
 import Data.Maybe
@@ -22,35 +21,25 @@ mosquittoTopic = "test"
 topic s = "/" Prelude.++ s
 loadSpec = undefined
 
-pub :: ZMQ.Socket Pub -> String -> String -> IO ()
-pub s t m = do
-  putStrLn $ "PUB " Prelude.++ t Prelude.++ " > " Prelude.++ m
-  ZMQ.send s [] (B.pack (Prelude.unwords [t,m]))
+-- TODO: Reliable pub.
+pub :: String -> String -> IO ()
+pub t m = do
+ threadDelay 1000000
+ putStrLn $ "mosquitto_pub  -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
+ (_, _, _, ph) <- runInteractiveCommand $ "mosquitto_pub  -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t Prelude.++ " -m '" Prelude.++ m Prelude.++ "'"
+ threadDelay 1000000
+ waitForProcess ph
+ Prelude.return ()
 
-sub :: Node -> String -> IO String
-sub b t = ZMQ.withContext $ \c -> do
-  putStrLn $ "SUB " Prelude.++ t Prelude.++ " @ " Prelude.++ b
-  subscriber <- ZMQ.socket c ZMQ.Sub
-  ZMQ.connect subscriber ("tcp://" Prelude.++ b Prelude.++ ":5556")
-  ZMQ.subscribe subscriber (B.pack t)
-  update <- ZMQ.receive subscriber
-  let [_, r] = Prelude.words $ B.unpack update
-  Prelude.return r
-
-push :: Context -> String -> String -> IO ()
-push c b t = do
-  putStrLn $ "PUSH " Prelude.++ t Prelude.++ " @ " Prelude.++ b
-  sender <- ZMQ.socket c ZMQ.Push
-  ZMQ.connect sender ("tcp://" Prelude.++ b Prelude.++ ":5558")
-  ZMQ.send sender [] (B.pack "!")
-
-pull :: Context -> String -> IO ()
-pull c t = do
-  putStrLn $ "PULL " Prelude.++ t
-  receiver <- ZMQ.socket c ZMQ.Pull
-  ZMQ.bind receiver "tcp://*:5558"
-  ZMQ.receive receiver
-  Prelude.return ()
+-- TODO: Timeout sub with default action
+sub :: String -> IO String
+sub t = do
+  -- FIXME: The following code assumes one reading per line
+  putStrLn $ "mosquitto_sub -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
+  (_, oh, _, ph) <- runInteractiveCommand $ "mosquitto_sub -h " Prelude.++ broker Prelude.++ " -t " Prelude.++ topic mosquittoTopic Prelude.++ topic t
+  l <- hGetLine $ oh
+  terminateProcess ph
+  Prelude.return l
 
 executeCommand :: [(DepReq, Driver)] -> Command -> IO ()
 executeCommand drivers c = do
