@@ -27,7 +27,7 @@ $(deriveLift ''Program)
 
 -- Pseudo code with TH notation
 compileProgram :: Backend
-compileProgram flags (p,q) = do
+compileProgram flags qs (p,q) = do
   when (elem "dump-prog" flags) (print (p,q))
   -- TODO: get arg for drivers?
   prog <- runQ . fmap (B.append (B.pack "module Main where\n\
@@ -52,7 +52,8 @@ compileProgram flags (p,q) = do
                                                \  ")
                              . B.pack . P.show . ppr) . compileProgram' $ p
   let depreq = B.pack $ "-- " P.++ (P.show q) P.++ "\n"
-  return $ B.append depreq prog
+      nodes  = B.pack $ "-- " P.++ (P.show qs) P.++ "\n"
+  return $ B.append depreq (B.append nodes prog)
   where
     compileProgram' :: Program -> ExpQ
     compileProgram' (PVar "forever") = varE . mkName $ "Control.Monad.forever"

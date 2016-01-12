@@ -22,6 +22,7 @@ Executable scc
     Scale.Frontends.FScale.Types,
     Scale.Drivers.Fake
     Scale.Drivers.POSIX
+    Scale.Util
   Hs-Source-Dirs: src
 
 Library
@@ -37,4 +38,5 @@ Library
     Scale.Optimise,
     Scale.Drivers.Fake
     Scale.Drivers.POSIX
+    Scale.Util
   Hs-Source-Dirs: src

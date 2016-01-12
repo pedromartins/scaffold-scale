@@ -76,7 +76,7 @@ main = do
   s <- B.readFile fname
   (ps, qs) <- unzip <$> frontend opts s
   forM (zip3 [1..length ps] ps qs) $ \(i,p,q) -> do
-    doc <- backend opts $ (p,q)
+    doc <- backend opts qs $ (p,q)
     B.writeFile (fname ++ show i) doc
   return ()
 

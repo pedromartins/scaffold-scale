@@ -3,7 +3,6 @@ module Scale.Types where
 
 import Data.ByteString
 import Data.Data
-import qualified Text.ParserCombinators.Parsec as Parsec
 
 type DataQuery = String
 type Command = String
@@ -42,7 +41,7 @@ data Program = PVar Ident
 type Option = String
 
 type Frontend = [Option] -> ByteString -> IO [(Program, DepReq)]
-type Backend = [Option] -> (Program, DepReq) -> IO ByteString
+type Backend = [Option] -> [DepReq] -> (Program, DepReq) -> IO ByteString
 
 -- TODO:Should be a newtype: String is not specific enough
 type Driver = String
