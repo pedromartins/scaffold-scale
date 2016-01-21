@@ -6,7 +6,7 @@ import Data.Data
 import Data.Generics
 import Data.Generics.Schemes
 
-import Scale.Types
+import Scaffold.Types
 import Scale.Frontends.GScale.Types
 import Control.Monad.State.Lazy
 

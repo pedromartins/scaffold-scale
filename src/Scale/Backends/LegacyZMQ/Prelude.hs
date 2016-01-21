@@ -4,12 +4,12 @@ import System.ZMQ4 as ZMQ
 import Control.Concurrent
 import Data.IORef
 import Data.Maybe
-import Scale.Drivers.POSIX
+import Scaffold.Drivers.POSIX
 import qualified Data.ByteString.Char8 as B
 import System.Process
 import Control.Monad
 import System.IO
-import Scale.Types
+import Scaffold.Types
 
 modify :: (Eq a) => a -> b -> [(a,b)] -> [(a,b)]
 modify k v [] = [(k,v)]

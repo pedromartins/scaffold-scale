@@ -14,7 +14,7 @@ import Text.ParserCombinators.Parsec.Language
 import Text.ParserCombinators.Parsec.Error
 import Text.Parsec.Pos
 
-import Scale.Types
+import Scaffold.Types
 import Scale.Frontends.FScale.Types
 import Scale.Frontends.FScale.Compiler
 import Scale.Frontends.FScale.Parser

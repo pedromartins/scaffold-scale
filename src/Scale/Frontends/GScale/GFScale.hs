@@ -12,7 +12,7 @@ import qualified Text.ParserCombinators.Parsec.Token as Token
 import qualified Text.ParserCombinators.Parsec as Parsec
 import qualified Data.ByteString.Char8 as B
 
-import Scale.Types
+import Scaffold.Types
 import Scale.Frontends.GScale.Types
 import Scale.Frontends.GScale.Parser
 import Scale.Frontends.GScale.Compiler

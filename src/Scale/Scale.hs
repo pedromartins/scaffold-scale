@@ -6,7 +6,7 @@ import Scale.Backends.LegacyZMQ as Backends.LegacyZMQ
 import Scale.Frontends.FScale as Frontends.FScale
 import Scale.Frontends.GScale.GFScale as Frontends.GFScale
 
-import Scale.Types
+import Scaffold.Types
 
 import qualified Data.ByteString.Char8 as B
 import Data.Char

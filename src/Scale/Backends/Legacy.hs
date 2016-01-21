@@ -6,16 +6,16 @@ module Scale.Backends.Legacy where
 import Control.Arrow
 import Data.Maybe
 import Data.IORef
-import Scale.Drivers.POSIX
+import Scaffold.Drivers.POSIX
 import qualified Data.ByteString.Char8 as B
 import System.Process
 import Control.Concurrent.MVar
 import Control.Monad
 import Control.Monad.Fix
 import System.IO
-import Scale.Types
-import qualified Scale.Backends.Legacy.Prelude as P
-import Scale.Backends.Legacy.Prelude hiding ((>>=),(==),(.),return,lookup,readIORef)
+import Scaffold.Types
+import qualified Scaffold.Prelude as P
+import Scaffold.Prelude hiding ((>>=),(==),(.),return,lookup,readIORef)
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Quote

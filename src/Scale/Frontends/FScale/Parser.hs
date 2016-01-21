@@ -10,7 +10,7 @@ import Text.ParserCombinators.Parsec.Combinator
 import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
-import Scale.Types
+import Scaffold.Types
 import Scale.Frontends.FScale.Types
 
 scaleDef = haskellStyle

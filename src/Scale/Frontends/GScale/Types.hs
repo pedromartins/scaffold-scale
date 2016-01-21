@@ -5,7 +5,7 @@ import Data.ByteString
 import Data.Data
 import qualified Text.ParserCombinators.Parsec as Parsec
 
-import Scale.Types
+import Scaffold.Types
 
 data Scale f = DataQ DataQuery
             | DataBracket DataQuery (Scale f)

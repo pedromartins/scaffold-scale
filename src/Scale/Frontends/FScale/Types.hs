@@ -5,7 +5,7 @@ import Data.ByteString
 import Data.Data
 import qualified Text.ParserCombinators.Parsec as Parsec
 
-import Scale.Types
+import Scaffold.Types
 
 data Stmt = ExprStmt Expr
           | Bind Ident Expr
