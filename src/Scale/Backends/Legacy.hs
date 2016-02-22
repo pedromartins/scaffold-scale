@@ -36,9 +36,9 @@ compileProgram flags qs (p,q) = do
                                                \import Data.Maybe\n\
                                                \import Data.IORef\n\
                                                \import System.Environment\n\
-                                               \import Scale.Types\n\
-                                               \import Scale.Drivers.POSIX\n\
-                                               \import Scale.Backends.Legacy.Prelude\n\
+                                               \import Scaffold.Types\n\
+                                               \import Scaffold.Drivers.POSIX\n\
+                                               \import Scaffold.Prelude\n\
                                                \main = do\n\
                                                \  args <- getArgs\n\
                                                \  let drivers :: [(DepReq, Driver)]\n\
