@@ -14,8 +14,8 @@ import Scaffold.Types
 import Scale.Frontends.FScale.Types
 
 scaleDef = haskellStyle
-  { reservedOpNames = [ "λ",  "?", "¢", ".", "→", "=", ":", ">" ]
-  , reservedNames = [ "with", "ccase", "of", "Case", "if", "then", "else"]
+  { reservedOpNames = [ "λ",  "?", "¢", ".", "→", "=", ":", ">", ";" ]
+  , reservedNames = [ "with", "ccase", "of", "Case", "if", "then", "else", "let", "in"]
   }
 
 scaleLexer = Token.makeTokenParser scaleDef
@@ -33,6 +33,7 @@ semiSep = Token.semiSep scaleLexer
 braces = Token.braces scaleLexer
 brackets = Token.brackets scaleLexer
 symbol = Token.symbol scaleLexer
+integer = Token.integer scaleLexer
 
 scaleStmt :: Parser Stmt
 scaleStmt  =  try (Bind <$> identifier <*> (reservedOp "<-" *> scaleExpr))
@@ -46,10 +47,14 @@ scaleExpr = foldl1 App <$> sepBy scaleExpr' whiteSpace
               <|> If <$> (reserved "if" *> scaleExpr)
                      <*> (reserved "then" *> scaleExpr)
                      <*> (reserved "else" *> scaleExpr)
+              <|> Let <$> (reserved "let" *> sepBy ((,) <$> identifier <*> (reservedOp "=" *> scaleExpr)) (reservedOp ";")) <*> (reserved "in" *> scaleExpr)
               <|> DataQ <$> (reservedOp "?" *> dataExpr)
+              <|> try (Op <$> parens operator)
               <|> try (DataBracket <$> dataExpr <*> brackets scaleExpr)
               <|> Cmd <$> (reserved "cmd" *> command)
               <|> With <$> (reserved "with" *> requirement) <*> sepBy identifier (reservedOp ",") <*> (whiteSpace *> scaleExpr)
+              <|> IntLit <$> integer
+              <|> StringLit <$> stringLiteral
               <|> parens scaleExpr
               <|> (do x <- identifier
                       case lookup x builtins of

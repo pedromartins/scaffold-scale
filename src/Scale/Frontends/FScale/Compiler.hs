@@ -1,6 +1,9 @@
+{-# LANGUAGE TupleSections #-}
 module Scale.Frontends.FScale.Compiler where
 
 import Data.Data
+import Data.List
+import Data.Maybe
 
 import Data.Generics
 import Data.Generics.Schemes
@@ -9,12 +12,21 @@ import Scaffold.Types
 import Scale.Frontends.FScale.Types
 import Control.Monad.State.Lazy
 
-compileModule :: String -> (Module, Requirement) -> [(Program, DepReq)]
-compileModule a = concatMap (compileDecl a) . fst
+compileModule :: String -> Module -> [(Program, DepReq)]
+compileModule a m =
+  let (ipqs, pqs) = unzip . map (compileDecl a) $ m
+      extractDR ((i, (p, q)):ipqs) =
+        let (ips, qs) = extractDR ipqs
+        in ((i,p):ips, q:qs)
+      extractDR [] = ([], [])
+      (ips, qs) = extractDR ipqs
+      mainp = fromJust $ lookup "main" ips
+  in (PLet (ips \\ [("main",mainp)]) mainp, foldl1 And qs):concat pqs
 
-compileDecl :: String -> Decl -> [(Program, DepReq)]
+compileDecl :: String -> Decl -> ((Ident, (Program, DepReq)), [(Program, DepReq)])
 compileDecl a (ValAssgn i e) =
-  (compileExpr a e)
+  let pq:pqs = compileExpr a e
+  in ((i,pq),pqs)
 
 collectData :: Expr -> [DataQuery]
 collectData = everything (++) (mkQ [] extractData)
@@ -70,11 +82,18 @@ exprToProgram a q e = let (p, pqs) = evalState (exprToProgram' q e) [1..] in (p,
       return (Pub (HeapMessage a n vs) `Seq` (Sub (ResultMessage a n p)),
         pqs ++ [(Sub (HeapMessage a n vs) `Seq` (Pub (ResultMessage a n p)), Fulfills r)])
     exprToProgram' q (Constr i) = return (PConstr i, [])
+    exprToProgram' q (IntLit i) = return (PIntLit i, [])
+    exprToProgram' q (StringLit i) = return (PStringLit i, [])
+    exprToProgram' q (Op o) = return (POp o, [])
+    exprToProgram' q (Let ies e) = do
+      (ps, pqs) <- fmap unzip $ mapM (\(_,e) -> exprToProgram' q e) ies
+      (p, pqs') <- exprToProgram' q e
+      return (PLet (zip (map fst ies) ps) p, concat pqs ++ pqs')
 
 compileExpr a e =
   let dataQs = collectData e
       commands = collectCommands e
-  in    map (\d -> (Pub (DataMessage d), Provides d)) dataQs
+  in exprToProgram a Any e
+     ++ map (\d -> (Pub (DataMessage d), Provides d)) dataQs
      ++ map (\c -> (Sub (CommandMessage c), IsCapableOf c)) commands
-     ++ exprToProgram a Any e
 

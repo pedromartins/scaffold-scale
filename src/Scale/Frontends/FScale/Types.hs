@@ -12,6 +12,7 @@ data Stmt = ExprStmt Expr
           deriving (Eq, Show)
 
 data Expr = Var Ident
+          | Op Ident
           | Lam Ident Expr
           | App Expr Expr
           | If Expr Expr Expr
@@ -20,9 +21,13 @@ data Expr = Var Ident
           | Cmd Command
           | With Requirement [Ident] Expr
           | Constr Ident
+          | IntLit Integer
+          | StringLit String
+          | Let [(Ident, Expr)] Expr
           deriving (Data, Typeable, Eq, Show)
 
 data Decl = ValAssgn Ident Expr
+          | Import Ident
           deriving (Eq, Show)
 
 type Module = [Decl]

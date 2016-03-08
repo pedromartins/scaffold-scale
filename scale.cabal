@@ -10,7 +10,7 @@ Cabal-Version:       >=1.2
 Executable scc
   Build-Depends: base, bytestring, parsec, process, template-haskell, th-lift,
                  syb, optparse-applicative, split, monads-tf, scaffold-base,
-                 zeromq4-haskell
+                 zeromq4-haskell, utf8-string
   Main-is:  Scale/Scale.hs
   Other-Modules:
     Scale.Optimise,

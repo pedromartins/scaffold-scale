@@ -13,6 +13,7 @@ import Control.Concurrent.MVar
 import Control.Monad
 import Control.Monad.Fix
 import System.IO
+import System.IO.Unsafe
 import Scaffold.Types
 import qualified Scaffold.Prelude as P
 import Scaffold.Prelude hiding ((>>=),(==),(.),return,lookup,readIORef)
@@ -48,22 +49,27 @@ compileProgram flags qs (p,q) = do
                                                \                          [sdrivers] -> (Prelude.read sdrivers, [])\n\
                                                \                          [sdrivers,snodes] -> (Prelude.read sdrivers, Prelude.read snodes)\n\
                                                \  readings <- newIORef []\n\
-                                               \  let none = \"_|_\"\n\
-                                               \  ")
-                             . B.pack . P.show . ppr) . compileProgram' $ p
+                                               \  let none = \"_|_\"\n")
+                             . B.pack . unlines . map ("  "Prelude.++) . lines . ("join $ "Prelude.++) . P.show . ppr) . compileProgram' $ p
   let depreq = B.pack $ "-- " P.++ (P.show q) P.++ "\n"
       nodes  = B.pack $ "-- " P.++ (P.show qs) P.++ "\n"
   return $ B.append depreq (B.append nodes prog)
   where
     compileProgram' :: Program -> ExpQ
-    compileProgram' (PVar "forever") = varE . mkName $ "Control.Monad.forever"
-    compileProgram' (PVar x) = varE . mkName $ x
-    -- compileProgram' (PLam i e) = lamE [varP . mkName $ i] (compileProgram e)
+    compileProgram' (PVar "forever") = [| P.ret $(varE . mkName $ "Control.Monad.forever") |]
+    compileProgram' (PVar x) = [| P.ret $(varE . mkName $ x) |]
+    compileProgram' (PLam i e) = [| P.ret $(lamE [varP . mkName $ i] (compileProgram' e)) |]
 
-    compileProgram' (PApp p p') = [| $(compileProgram' p) $(compileProgram' p') |]
+    compileProgram' (PApp p p') = [| P.ap $(compileProgram' p) $(compileProgram' p') |]
+    compileProgram' (PLet ips p) =
+      (letE (map (\(i,p) -> valD (varP . mkName $ i) (normalB . compileProgram' $ p) []) ips) (compileProgram' p))
 
     compileProgram' (PIf p p' p'') = [| $(compileProgram' p) P.>>= \cond ->
       if cond then $(compileProgram' p') else $(compileProgram' p'') |]
+
+    compileProgram' (PIntLit i) = [| P.ret $(litE (integerL i)) |]
+    compileProgram' (PStringLit s) = [| P.ret $(litE (stringL s)) |]
+    compileProgram' (POp o) = [| P.ret $(infixE Nothing (varE . mkName $ o) Nothing) |]
 
     compileProgram' (PWhile p p') = [| fix (\f -> $(compileProgram' p) P.>>= \cond -> if cond then $(compileProgram' p') P.>>= f else return ()) |]
 
@@ -87,7 +93,7 @@ compileProgram flags qs (p,q) = do
     compileProgram' (Read d) = [| (P.readIORef $(varE . mkName $ "readings")) P.>>=
       (P.return P.. P.fromJust P.. P.lookup $(stringE d)) |]
     compileProgram' (PWith r p) = [| $(compileProgram' p) |]
-    compileProgram' (PConstr i) = [| i |]
+    compileProgram' (PConstr i) = [| P.ret i |]
     compileProgram' (Seq p p') = [| $(compileProgram' p) P.>> $(compileProgram' p') |]
     compileProgram' (PExecve s) = [| execve $(stringE s) |]
 
