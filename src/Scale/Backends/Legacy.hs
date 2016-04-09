@@ -67,7 +67,7 @@ compileProgram flags qs (p,q) = do
     compileProgram' (PIf p p' p'') = [| $(compileProgram' p) P.>>= \cond ->
       if cond then $(compileProgram' p') else $(compileProgram' p'') |]
 
-    compileProgram' (PIntLit i) = [| P.ret $(litE (integerL i)) |]
+    compileProgram' (PIntLit i) = [| P.ret ($(litE (integerL i)) :: IntT) |]
     compileProgram' (PStringLit s) = [| P.ret $(litE (stringL s)) |]
     compileProgram' (POp o) = [| P.ret $(infixE Nothing (varE . mkName $ o) Nothing) |]
 
