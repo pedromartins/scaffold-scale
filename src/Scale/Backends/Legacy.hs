@@ -50,7 +50,7 @@ compileProgram flags qs (p,q) = do
                                                \                          [sdrivers,snodes] -> (Prelude.read sdrivers, Prelude.read snodes)\n\
                                                \  readings <- newIORef []\n\
                                                \  let none = \"_|_\"\n")
-                             . B.pack . unlines . map ("  "Prelude.++) . lines . ("join $ "Prelude.++) . P.show . ppr) . compileProgram' $ p
+                             . B.pack . unlines . map ("  "Prelude.++) . lines . P.show . ppr) . compileProgram' $ p
   let depreq = B.pack $ "-- " P.++ (P.show q) P.++ "\n"
       nodes  = B.pack $ "-- " P.++ (P.show qs) P.++ "\n"
   return $ B.append depreq (B.append nodes prog)
