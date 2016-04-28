@@ -61,8 +61,8 @@ compileProgram flags qs (p,q) = do
 
     compileProgram' (PApp (PVar "forever") p') = [| $(varE . mkName $ "forever") $(compileProgram' p') |]
     compileProgram' (PApp p p') = [| P.ap $(compileProgram' p) $(compileProgram' p') |]
-    compileProgram' (PLet ips p) =
-      (letE (map (\(i,p) -> valD (varP . mkName $ i) (normalB . compileProgram' $ p) []) ips) (compileProgram' p))
+    compileProgram' (PLet ips pf) =
+      compileProgram' $ foldr (\(i,p) e -> PApp (PLam i e) p) pf ips
 
     compileProgram' (PIf p p' p'') = [| $(compileProgram' p) P.>>= \cond ->
       if cond then $(compileProgram' p') else $(compileProgram' p'') |]
