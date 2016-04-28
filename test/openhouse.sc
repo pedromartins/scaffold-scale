@@ -1,2 +1,4 @@
-main = forever switch[if threshold ?switch then cmd turnOnLight else cmd turnOffLight]
+main = forever switch[if threshold ?switch
+                      then cmd turnOnLight
+                      else cmd turnOffLight]
 
