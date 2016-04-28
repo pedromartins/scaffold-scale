@@ -56,10 +56,10 @@ compileProgram flags qs (p,q) = do
   return $ B.append depreq (B.append nodes prog)
   where
     compileProgram' :: Program -> ExpQ
-    compileProgram' (PVar "forever") = [| P.ret $(varE . mkName $ "Control.Monad.forever") |]
     compileProgram' (PVar x) = [| P.ret $(varE . mkName $ x) |]
     compileProgram' (PLam i e) = [| P.ret $(lamE [varP . mkName $ i] (compileProgram' e)) |]
 
+    compileProgram' (PApp (PVar "forever") p') = [| $(varE . mkName $ "forever") $(compileProgram' p') |]
     compileProgram' (PApp p p') = [| P.ap $(compileProgram' p) $(compileProgram' p') |]
     compileProgram' (PLet ips p) =
       (letE (map (\(i,p) -> valD (varP . mkName $ i) (normalB . compileProgram' $ p) []) ips) (compileProgram' p))
@@ -91,7 +91,7 @@ compileProgram flags qs (p,q) = do
     compileProgram' (Sub (ResultMessage a n p)) = [| sub (a P.++ "/" P.++ P.show n P.++ "/result") |]
 
     compileProgram' (Read d) = [| (P.readIORef $(varE . mkName $ "readings")) P.>>=
-      (P.return P.. P.fromJust P.. P.lookup $(stringE d)) |]
+      (P.return P.. P.read P.. P.fromJust P.. P.lookup $(stringE d)) |]
     compileProgram' (PWith r p) = [| $(compileProgram' p) |]
     compileProgram' (PConstr i) = [| P.ret i |]
     compileProgram' (Seq p p') = [| $(compileProgram' p) P.>> $(compileProgram' p') |]
