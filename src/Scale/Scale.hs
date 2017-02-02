@@ -8,11 +8,12 @@ import Scale.Frontends.GScale.GFScale as Frontends.GFScale
 
 import Scaffold.Types
 
-import qualified Data.ByteString.Char8 as B
 import Data.Char
-import Data.Maybe
 import Data.List
 import Data.List.Split
+import Data.Maybe
+import Data.Monoid
+import qualified Data.ByteString.Char8 as B
 import Text.Parsec.Prim(parse)
 import Control.Applicative
 import Control.Arrow
